@@ -45,7 +45,7 @@ func handlerChirpsValidate(w http.ResponseWriter, r *http.Request) {
         Body string `json:"body"`
     }
     type returnVals struct {
-        Valid bool `json:"valid"`
+        CleanedBody string `json:"cleaned_body"`
     }
 
     decoder := json.NewDecoder(r.Body)
