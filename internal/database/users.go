@@ -37,21 +37,6 @@ func (db *DB) CreateUser(email, hashedPassword string) (User, error) {
     return user, nil
 }
 
-// GetChirps returns all chirps in the database
-func (db *DB) GetChirps() ([]Chirp, error) {
-    dbStructure, err := db.loadDB()
-    if err != nil {
-        return nil, err
-    }
-
-    chirps := make([]Chirp, 0, len(dbStructure.Chirps))
-    for _, chirp := range dbStructure.Chirps {
-        chirps = append(chirps, chirp)
-    }
-
-    return chirps, nil
-}
-
 // GetUser returns one User by ID
 func (db *DB) GetUser(id int) (User, error) {
     dbStructure, err := db.loadDB()
