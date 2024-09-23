@@ -29,3 +29,17 @@ func (db *DB) SaveRefreshToken(userID int, token string) error {
     }
     return nil
 }
+
+func (db *DB) RevokeRefreshToken(token string) error {
+    dbStructure, err := db.loadDB()
+    if err != nil {
+        return err
+    }
+
+    delete(dbStructure.RefreshTokens, token)
+    err = db.writeDB(dbStructure)
+    if err != nil {
+        return err
+    }
+    return nil
+}
