@@ -59,7 +59,7 @@ func (db *DB) UserForRefreshToken(token string) (User, error) {
         return User{}, ErrNotExist
     }
 
-    user, err = db.GetUser(refreshToken.UserID)
+    user, err := db.GetUser(refreshToken.UserID)
     if err != nil {
         return User{}, err
     }
