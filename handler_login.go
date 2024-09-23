@@ -66,7 +66,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
             ID:             user.ID,
             Email:          user.Email,
         },
-        Token:          token,
+        Token:          accessToken,
         RefreshToken:   refreshToken,
     })
 }
