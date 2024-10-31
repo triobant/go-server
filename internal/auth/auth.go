@@ -10,7 +10,15 @@ import (
     "time"
 
     "github.com/golang-jwt/jwt/v5"
+    "github.com/google/uuid"
     "golang.org/x/crypto/bcrypt"
+)
+
+type TokenType string
+
+const (
+    // TokenTypeAccess -
+    TokenTypeAccess TokenType = "chirpy-access"
 )
 
 // ErrNoAuthHeaderIncluded
@@ -31,20 +39,23 @@ func CheckPasswordHash(password, hash string) error {
 }
 
 // MakeJWT
-func MakeJWT(userID int, tokenSecret string, expiresIn time.Duration) (string, error) {
+func MakeJWT(
+    userID uuid.UUID,
+    tokenSecret string,
+    expiresIn time.Duration,
+) (string, error) {
     signingKey := []byte(tokenSecret)
-
     token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-        Issuer:     "chirpy",
+        Issuer:     string(TokenTypeAccess),
         IssuedAt:   jwt.NewNumericDate(time.Now().UTC()),
         ExpiresAt:  jwt.NewNumericDate(time.Now().UTC().Add(expiresIn)),
-        Subject:    fmt.Sprintf("%d", userID),
+        Subject:    userID.String(),
     })
     return token.SignedString(signingKey)
 }
 
 // ValidateJWT
-func ValidateJWT(tokenString, tokenSecret string) (string, error) {
+func ValidateJWT(tokenString, tokenSecret string) (uuid.UUID, error) {
     claimsStruct := jwt.RegisteredClaims{}
     token, err := jwt.ParseWithClaims(
         tokenString,
@@ -52,23 +63,27 @@ func ValidateJWT(tokenString, tokenSecret string) (string, error) {
         func(token *jwt.Token) (interface{}, error) { return []byte(tokenSecret), nil },
     )
     if err != nil {
-        return "", err
+        return uuid.Nil, err
     }
 
     userIDString, err := token.Claims.GetSubject()
     if err != nil {
-        return "", err
+        return uuid.Nil, err
     }
 
     issuer, err := token.Claims.GetIssuer()
     if err != nil {
-        return "", err
+        return uuid.Nil, err
     }
-    if issuer != string("chirpy") {
-        return "", errors.New("invalid issuer")
+    if issuer != string(TokenTypeAccess) {
+        return uuid.Nil, errors.New("invalid issuer")
     }
 
-    return userIDString, nil
+    id, err := uuid.Parse(userIDString)
+    if err != nil {
+        return uuid.Nil, fmt.Errorf("invalid user ID: %w", err)
+    }
+    return id, nil
 }
 
 // GetBearerToken
