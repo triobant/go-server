@@ -6,6 +6,7 @@ import (
     "errors"
     "net/http"
 
+    "github.com/triobant/go-server/internal/auth"
     "github.com/google/uuid"
 )
 
@@ -17,9 +18,19 @@ func (cfg *apiConfig) handlerWebhook(w http.ResponseWriter, r *http.Request) {
         }
     }
 
+    apiKey, err := auth.GetAPIKey(r.Header)
+    if err != nil {
+        respondWithError(w, http.StatusUnauthorized, "Couldn't find APIKey", err)
+        return
+    }
+    if cfg.polkaKey != apiKey {
+        respondWithError(w, http.StatusBadRequest, "Keys don't match - Invalid Key", err)
+        return
+    }
+
     decoder := json.NewDecoder(r.Body)
     params := parameters{}
-    err := decoder.Decode(&params)
+    err = decoder.Decode(&params)
     if err != nil {
         respondWithError(w, http.StatusInternalServerError, "Couldn't decode parameters", err)
     }
