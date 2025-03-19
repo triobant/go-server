@@ -47,7 +47,7 @@ func main() {
 
     dbConn, err := sql.Open("postgres", dbURL)
     if err != nil {
-        log.Fatal("Error opening database: %s", err)
+        log.Fatalf("Error opening database: %s", err)
     }
     dbQueries := database.New(dbConn)
 
